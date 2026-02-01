@@ -37,6 +37,9 @@ yarn-error.log*
 /prisma/*.db
 /prisma/*.db-journal
 
+# Prisma client generado (se genera en postinstall)
+/src/generated
+
 # env files (can opt-in for committing if needed)
 .env*
 
