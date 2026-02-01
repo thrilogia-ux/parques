@@ -6,7 +6,7 @@ export async function getParqueById(id: string) {
     include: {
       puntos: {
         orderBy: { orden: "asc" },
-        include: { especies: { include: { especie: true } } },
+        include: { especies: { include: { especie: { include: { fotos: { orderBy: { orden: "asc" } } } } } } },
       },
       especies: true,
       utilityLayerItems: true,
@@ -15,7 +15,7 @@ export async function getParqueById(id: string) {
   if (!parque) return null;
   const puntos = parque.puntos.map((p) => {
     const { especies: pes, ...rest } = p as typeof p & {
-      especies: { especie: { id: string; nombre: string; tipo: string; descripcion: string | null; imagenUrl: string | null } }[];
+      especies: { especie: { id: string; nombre: string; tipo: string; descripcion: string | null; imagenUrl: string | null; fotos: { id: string; url: string; orden: number }[] } }[];
     };
     return { ...rest, especies: pes.map((pe) => pe.especie) };
   });

@@ -33,6 +33,7 @@ export default function ParkMapClient({
   const [nearbyData, setNearbyData] = useState<NearbyResponse | null>(null);
   const [nearbyLoading, setNearbyLoading] = useState(false);
   const [navExpanded, setNavExpanded] = useState(false);
+  const [toastPunto, setToastPunto] = useState(false);
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
   const [loadingMensajes, setLoadingMensajes] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -222,19 +223,20 @@ export default function ParkMapClient({
         <button
           type="button"
           onClick={() => setNavExpanded((v) => !v)}
-          className="w-full flex items-center justify-center gap-2 py-2 text-white hover:bg-slate-700/50 transition-colors rounded-t-xl min-h-[32px]"
+          className="w-full flex items-center justify-center gap-1.5 py-1.5 text-white hover:bg-slate-700/50 transition-colors rounded-t-xl min-h-[20px]"
           aria-expanded={navExpanded}
           aria-label={navExpanded ? "Cerrar menú" : "Abrir menú"}
         >
-          <span className="text-xs font-medium">{navExpanded ? "Cerrar menú" : "Menú"}</span>
-          <span className="text-base" aria-hidden="true">{navExpanded ? "▼" : "▲"}</span>
+          <span className="text-[11px] font-medium">{navExpanded ? "Cerrar menú" : "Menú"}</span>
+          <span className="text-sm" aria-hidden="true">{navExpanded ? "▼" : "▲"}</span>
         </button>
         <div className="nav-bottom-menu flex items-center justify-around px-4 pb-2">
           <button
             type="button"
-            onClick={() => { setShowNearby(false); setNavExpanded(false); }}
+            onClick={() => { setShowNearby(false); setSelectedPunto(null); setNavExpanded(false); }}
             className="flex flex-col items-center gap-1 py-1 text-white min-w-[4rem]"
-            aria-label="Mapa"
+            aria-label="Solo mapa"
+            title="Cerrar todo y ver solo el mapa"
           >
             <span className="text-xl" aria-hidden="true">🗺️</span>
             <span className="text-xs">Mapa</span>
@@ -244,15 +246,25 @@ export default function ParkMapClient({
             onClick={() => { fetchNearby(); setNavExpanded(false); }}
             className="flex flex-col items-center gap-1 py-1 text-white min-w-[4rem]"
             aria-label="Qué estás viendo"
+            title="Ver puntos y especies desde tu ubicación"
           >
             <span className="text-xl" aria-hidden="true">👁️</span>
             <span className="text-xs">Desde aquí</span>
           </button>
           <button
             type="button"
-            onClick={() => { setSelectedPunto(null); setNavExpanded(false); }}
-            className="flex flex-col items-center gap-1 py-1 text-slate-400 min-w-[4rem]"
-            aria-label="Punto actual"
+            onClick={() => {
+              if (!selectedPunto) {
+                setToastPunto(true);
+                setTimeout(() => setToastPunto(false), 2500);
+              } else {
+                setSelectedPunto(null);
+              }
+              setNavExpanded(false);
+            }}
+            className={`flex flex-col items-center gap-1 py-1 min-w-[4rem] ${selectedPunto ? "text-emerald-400" : "text-slate-400"}`}
+            aria-label="Cerrar ficha del punto"
+            title={selectedPunto ? "Cerrar ficha del punto" : "Tocá un marcador en el mapa para ver su ficha"}
           >
             <span className="text-xl" aria-hidden="true">📍</span>
             <span className="text-xs">Punto</span>
@@ -271,6 +283,16 @@ export default function ParkMapClient({
           }}
           onClose={() => setShowNearby(false)}
         />
+      )}
+
+      {toastPunto && (
+        <div
+          className="fixed left-4 right-4 bottom-[calc(20px+4px+env(safe-area-inset-bottom,0px)+72px+60px)] z-50 py-2 px-4 rounded-xl bg-slate-700/95 text-white text-sm text-center shadow-lg"
+          role="status"
+          aria-live="polite"
+        >
+          Tocá un marcador en el mapa para ver su ficha
+        </div>
       )}
 
       {selectedPunto && !showNearby && (

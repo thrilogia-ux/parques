@@ -76,7 +76,9 @@ export default function PointDrawer({
           <div>
             <h3 className="text-sm font-medium text-slate-400 mb-3">Especies en este punto</h3>
             <ul className="space-y-4">
-              {(punto.especies || []).map((e: Especie) => (
+              {(punto.especies || []).map((e: Especie) => {
+                const thumbUrl = e.fotos?.[0]?.url ?? e.imagenUrl;
+                return (
                 <li key={e.id}>
                   <button
                     type="button"
@@ -85,9 +87,9 @@ export default function PointDrawer({
                   >
                     <div className="flex gap-3 p-3">
                       <div className="shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-slate-600">
-                        {e.imagenUrl ? (
+                        {thumbUrl ? (
                           <img
-                            src={e.imagenUrl}
+                            src={thumbUrl}
                             alt={e.nombre}
                             className="w-full h-full object-cover"
                           />
@@ -108,7 +110,8 @@ export default function PointDrawer({
                     </div>
                   </button>
                 </li>
-              ))}
+              );
+              })}
             </ul>
           </div>
         )}

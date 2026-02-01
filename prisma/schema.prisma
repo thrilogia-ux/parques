@@ -56,8 +56,19 @@ model Especie {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  parque  Parque          @relation(fields: [parqueId], references: [id], onDelete: Cascade)
-  puntos  PuntoEspecie[]
+  parque Parque         @relation(fields: [parqueId], references: [id], onDelete: Cascade)
+  puntos PuntoEspecie[]
+  fotos  EspecieFoto[]
+}
+
+model EspecieFoto {
+  id        String   @id @default(cuid())
+  especieId String
+  url       String
+  orden     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  especie Especie @relation(fields: [especieId], references: [id], onDelete: Cascade)
 }
 
 model PuntoEspecie {

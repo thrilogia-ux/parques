@@ -62,9 +62,9 @@
 }
 
 .nav-bottom-spacer--collapsed {
-  /* Pestaña mínima + espacio para barra del navegador: menú más abajo, más espacio al mapa */
-  height: calc(32px + 8px + env(safe-area-inset-bottom, 0px) + 72px);
-  min-height: 100px;
+  /* Pestaña mínima + barra navegador: menú lo más abajo posible, máximo espacio al mapa */
+  height: calc(20px + 4px + env(safe-area-inset-bottom, 0px) + 72px);
+  min-height: 80px;
 }
 
 body {

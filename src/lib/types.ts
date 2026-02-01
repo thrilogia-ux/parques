@@ -25,6 +25,13 @@ export type Punto = {
   mensajes?: Mensaje[];
 };
 
+export type EspecieFoto = {
+  id: string;
+  especieId: string;
+  url: string;
+  orden: number;
+};
+
 export type Especie = {
   id: string;
   parqueId: string;
@@ -32,6 +39,7 @@ export type Especie = {
   tipo: string;
   descripcion: string | null;
   imagenUrl: string | null;
+  fotos?: EspecieFoto[];
 };
 
 export type UtilityLayerItem = {

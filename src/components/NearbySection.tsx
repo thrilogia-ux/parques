@@ -76,39 +76,42 @@ export default function NearbySection({
                   Especies en la zona
                 </h3>
                 <ul className="space-y-4">
-                  {especies.map((e) => (
-                    <li key={e.id}>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedEspecie(e)}
-                        className="w-full text-left rounded-xl bg-slate-700/80 overflow-hidden border border-slate-600 hover:border-slate-500 hover:bg-slate-700 transition-colors"
-                      >
-                        <div className="flex gap-3 p-3">
-                          <div className="shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-slate-600">
-                            {e.imagenUrl ? (
-                              <img
-                                src={e.imagenUrl}
-                                alt={e.nombre}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-3xl text-slate-500" aria-hidden="true">
-                                {e.tipo === "árbol" ? "🌳" : e.tipo === "animal" ? "🦌" : "🌿"}
-                              </div>
-                            )}
+                  {especies.map((e) => {
+                    const thumbUrl = e.fotos?.[0]?.url ?? e.imagenUrl;
+                    return (
+                      <li key={e.id}>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedEspecie(e)}
+                          className="w-full text-left rounded-xl bg-slate-700/80 overflow-hidden border border-slate-600 hover:border-slate-500 hover:bg-slate-700 transition-colors"
+                        >
+                          <div className="flex gap-3 p-3">
+                            <div className="shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-slate-600">
+                              {thumbUrl ? (
+                                <img
+                                  src={thumbUrl}
+                                  alt={e.nombre}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-3xl text-slate-500" aria-hidden="true">
+                                  {e.tipo === "árbol" ? "🌳" : e.tipo === "animal" ? "🦌" : "🌿"}
+                                </div>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-white">{e.nombre}</p>
+                              <p className="text-xs text-emerald-400/90 uppercase tracking-wide mt-0.5">{e.tipo}</p>
+                              {e.descripcion && (
+                                <p className="text-sm text-slate-300 mt-2 line-clamp-4 whitespace-pre-line">{e.descripcion}</p>
+                              )}
+                              <p className="text-xs text-slate-500 mt-2">Tocá para ver ficha completa</p>
+                            </div>
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-medium text-white">{e.nombre}</p>
-                            <p className="text-xs text-emerald-400/90 uppercase tracking-wide mt-0.5">{e.tipo}</p>
-                            {e.descripcion && (
-                              <p className="text-sm text-slate-300 mt-2 line-clamp-4 whitespace-pre-line">{e.descripcion}</p>
-                            )}
-                            <p className="text-xs text-slate-500 mt-2">Tocá para ver ficha completa</p>
-                          </div>
-                        </div>
-                      </button>
-                    </li>
-                  ))}
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               </section>
             )}

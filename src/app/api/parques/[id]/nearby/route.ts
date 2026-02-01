@@ -40,9 +40,12 @@ export async function GET(
     const [puntos, especies] = await Promise.all([
       prisma.punto.findMany({
         where: { parqueId },
-        include: { especies: { include: { especie: true } } },
+        include: { especies: { include: { especie: { include: { fotos: { orderBy: { orden: "asc" } } } } } } },
       }),
-      prisma.especie.findMany({ where: { parqueId } }),
+      prisma.especie.findMany({
+        where: { parqueId },
+        include: { fotos: { orderBy: { orden: "asc" } } },
+      }),
     ]);
 
     const puntosConDistancia = puntos

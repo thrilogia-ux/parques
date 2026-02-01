@@ -1,6 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  try {
+    const especie = await prisma.especie.findUnique({
+      where: { id },
+      include: { fotos: { orderBy: { orden: "asc" } } },
+    });
+    if (!especie) return NextResponse.json({ error: "No encontrada" }, { status: 404 });
+    return NextResponse.json(especie);
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ error: "Error al obtener especie" }, { status: 500 });
+  }
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

@@ -5,6 +5,8 @@ import { useState } from "react";
 type ParqueRow = { id: string; nombre: string; boundsLat1: number; boundsLng1: number; boundsLat2: number; boundsLng2: number };
 type PuntoRow = { id: string; nombre: string; tipo: string; lat: number; lng: number; orden: number; parque: { nombre: string }; parqueId: string };
 type EspecieRow = { id: string; nombre: string; tipo: string; parque: { nombre: string }; parqueId: string };
+type EspecieFotoRow = { id: string; url: string; orden: number };
+type EspecieEdit = EspecieRow & { descripcion: string | null; imagenUrl: string | null; fotos: EspecieFotoRow[] };
 type UtilRow = { id: string; tipo: string; lat: number; lng: number; nombre: string | null; parque: { nombre: string }; parqueId: string };
 
 type ContenidoClientProps = {
@@ -28,6 +30,8 @@ export default function ContenidoClient({
   const [error, setError] = useState<string | null>(null);
   const [puntoEspecies, setPuntoEspecies] = useState<EspecieRow[]>([]);
   const [puntoEspeciesPuntoId, setPuntoEspeciesPuntoId] = useState<string | null>(null);
+  const [editingEspecie, setEditingEspecie] = useState<EspecieEdit | null>(null);
+  const [editEspecieForm, setEditEspecieForm] = useState({ nombre: "", tipo: "árbol", descripcion: "", imagenUrl: "" });
 
   const [formParque, setFormParque] = useState({ nombre: "", descripcion: "", boundsLat1: "", boundsLng1: "", boundsLat2: "", boundsLng2: "", mapTileUrl: "" });
   const [formPunto, setFormPunto] = useState({ parqueId: "", nombre: "", tipo: "mirador", lat: "", lng: "", descripcion: "", orden: "0" });
@@ -238,6 +242,82 @@ export default function ContenidoClient({
     }
   };
 
+  const openEditEspecie = async (id: string) => {
+    setError(null);
+    try {
+      const res = await fetch(`/api/especies/${id}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error");
+      setEditingEspecie(data);
+      setEditEspecieForm({ nombre: data.nombre, tipo: data.tipo, descripcion: data.descripcion ?? "", imagenUrl: data.imagenUrl ?? "" });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al cargar especie");
+    }
+  };
+
+  const saveEditEspecie = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEspecie) return;
+    setError(null);
+    setLoading("edit-especie");
+    try {
+      const res = await fetch(`/api/especies/${editingEspecie.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: editEspecieForm.nombre.trim(),
+          tipo: editEspecieForm.tipo.trim(),
+          descripcion: editEspecieForm.descripcion.trim() || null,
+          imagenUrl: editEspecieForm.imagenUrl.trim() || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error");
+      setEspecies((prev) => prev.map((e) => (e.id === editingEspecie.id ? { ...e, nombre: data.nombre, tipo: data.tipo } : e)));
+      setEditingEspecie(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al guardar");
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const addEspecieFoto = async (especieId: string, file: File) => {
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.set("file", file);
+      const up = await fetch("/api/upload", { method: "POST", body: formData });
+      const upData = await up.json();
+      if (!upData.url) throw new Error("Error al subir");
+      const res = await fetch(`/api/especies/${especieId}/fotos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: upData.url }),
+      });
+      const foto = await res.json();
+      if (!res.ok) throw new Error(foto.error || "Error");
+      if (editingEspecie && editingEspecie.id === especieId) {
+        setEditingEspecie((prev) => prev ? { ...prev, fotos: [...(prev.fotos || []), foto] } : null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al subir foto");
+    }
+  };
+
+  const removeEspecieFoto = async (especieId: string, fotoId: string) => {
+    setError(null);
+    try {
+      const res = await fetch(`/api/especies/${especieId}/fotos/${fotoId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error((await res.json()).error);
+      if (editingEspecie && editingEspecie.id === especieId) {
+        setEditingEspecie((prev) => prev ? { ...prev, fotos: (prev.fotos || []).filter((f) => f.id !== fotoId) } : null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al eliminar foto");
+    }
+  };
+
   return (
     <div className="space-y-10">
       {error && (
@@ -371,7 +451,11 @@ export default function ContenidoClient({
           </div>
           <div className="sm:col-span-2">
             <label className={labelClass}>Descripción (opcional)</label>
-            <input className={inputClass} value={formEspecie.descripcion} onChange={(e) => setFormEspecie((f) => ({ ...f, descripcion: e.target.value }))} />
+            <textarea className={inputClass} rows={2} value={formEspecie.descripcion} onChange={(e) => setFormEspecie((f) => ({ ...f, descripcion: e.target.value }))} />
+          </div>
+          <div className="sm:col-span-2">
+            <label className={labelClass}>URL imagen principal (opcional)</label>
+            <input className={inputClass} value={formEspecie.imagenUrl} onChange={(e) => setFormEspecie((f) => ({ ...f, imagenUrl: e.target.value }))} placeholder="/uploads/..." />
           </div>
           <div className="sm:col-span-2 flex items-end">
             <button type="submit" disabled={!!loading || !formEspecie.parqueId} className="py-2 px-4 rounded-lg bg-emerald-600 text-white text-sm font-medium disabled:opacity-50">
@@ -383,10 +467,73 @@ export default function ContenidoClient({
           {especies.map((e) => (
             <li key={e.id} className="flex items-center justify-between gap-2 py-1.5 px-2 rounded-lg bg-slate-800/50">
               <span className="text-white">{e.nombre}</span> ({e.tipo}) — {e.parque.nombre}
-              <button type="button" onClick={() => deleteEspecie(e.id)} className={`${btnSm} bg-red-600/80 text-white hover:bg-red-500`}>Eliminar</button>
+              <div className="flex gap-1">
+                <button type="button" onClick={() => openEditEspecie(e.id)} className={`${btnSm} bg-slate-600 text-white hover:bg-slate-500`}>Editar</button>
+                <button type="button" onClick={() => deleteEspecie(e.id)} className={`${btnSm} bg-red-600/80 text-white hover:bg-red-500`}>Eliminar</button>
+              </div>
             </li>
           ))}
         </ul>
+
+        {editingEspecie && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setEditingEspecie(null)}>
+            <div className="bg-slate-800 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-4 shadow-xl" onClick={(ev) => ev.stopPropagation()}>
+              <h3 className="text-lg font-medium text-white mb-4">Editar especie: {editingEspecie.nombre}</h3>
+              <form onSubmit={saveEditEspecie} className="space-y-3">
+                <div>
+                  <label className={labelClass}>Nombre</label>
+                  <input className={inputClass} value={editEspecieForm.nombre} onChange={(e) => setEditEspecieForm((f) => ({ ...f, nombre: e.target.value }))} required />
+                </div>
+                <div>
+                  <label className={labelClass}>Tipo</label>
+                  <select className={inputClass} value={editEspecieForm.tipo} onChange={(e) => setEditEspecieForm((f) => ({ ...f, tipo: e.target.value }))}>
+                    <option value="árbol">árbol</option>
+                    <option value="planta">planta</option>
+                    <option value="animal">animal</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={labelClass}>Descripción</label>
+                  <textarea className={inputClass} rows={4} value={editEspecieForm.descripcion} onChange={(e) => setEditEspecieForm((f) => ({ ...f, descripcion: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={labelClass}>URL imagen principal</label>
+                  <input className={inputClass} value={editEspecieForm.imagenUrl} onChange={(e) => setEditEspecieForm((f) => ({ ...f, imagenUrl: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={labelClass}>Fotos (slider)</label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {(editingEspecie.fotos || []).map((f) => (
+                      <div key={f.id} className="relative">
+                        <img src={f.url} alt="" className="w-16 h-16 object-cover rounded-lg bg-slate-700" />
+                        <button type="button" onClick={() => removeEspecieFoto(editingEspecie.id, f.id)} className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-600 text-white text-xs leading-none flex items-center justify-center" aria-label="Quitar foto">×</button>
+                      </div>
+                    ))}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="text-slate-400 text-sm"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) addEspecieFoto(editingEspecie.id, file);
+                      e.target.value = "";
+                    }}
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Varias fotos se muestran como slider tipo Instagram.</p>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <button type="submit" disabled={!!loading} className="py-2 px-4 rounded-lg bg-emerald-600 text-white text-sm font-medium disabled:opacity-50">
+                    {loading === "edit-especie" ? "Guardando..." : "Guardar"}
+                  </button>
+                  <button type="button" onClick={() => setEditingEspecie(null)} className="py-2 px-4 rounded-lg bg-slate-600 text-white text-sm font-medium">
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </section>
 
       <section>
