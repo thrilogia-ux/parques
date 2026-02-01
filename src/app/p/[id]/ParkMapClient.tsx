@@ -181,7 +181,7 @@ export default function ParkMapClient({
   }, [parque.id, parque.nombre]);
 
   return (
-    <main className="h-screen flex flex-col bg-slate-900">
+    <main className="h-screen h-[100dvh] min-h-[100dvh] max-h-[100dvh] flex flex-col bg-slate-900">
       <header className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700 shrink-0">
         <Link
           href="/"
@@ -208,7 +208,7 @@ export default function ParkMapClient({
       </div>
 
       <nav
-        className="flex items-center justify-around px-4 py-3 bg-slate-800 border-t border-slate-700 shrink-0 safe-area-pb"
+        className="flex items-center justify-around px-4 py-3 bg-slate-800 border-t border-slate-700 shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
         aria-label="Navegación principal"
       >
         <button

@@ -6,6 +6,65 @@ import type { Parque, Punto, UtilityLayerItem } from "@/lib/types";
 const LEAFLET_URL = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
 const LEAFLET_CSS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildPuntoPopupContent(p: Punto, baseUrl: string): string {
+  const nombre = escapeHtml(p.nombre);
+  const tipo = escapeHtml(p.tipo);
+  const descShort = p.descripcion
+    ? escapeHtml(p.descripcion.slice(0, 100) + (p.descripcion.length > 100 ? "…" : ""))
+    : "";
+  const primeraEspecie = p.especies?.[0];
+  const imgHtml =
+    primeraEspecie?.imagenUrl
+      ? `<img src="${baseUrl}${primeraEspecie.imagenUrl.startsWith("/") ? "" : "/"}${primeraEspecie.imagenUrl}" alt="" class="map-popup-img" />`
+      : primeraEspecie
+        ? `<div class="map-popup-emoji">${primeraEspecie.tipo === "árbol" ? "🌳" : primeraEspecie.tipo === "animal" ? "🦌" : "🌿"}</div>`
+        : "";
+  const especieNombre = primeraEspecie ? escapeHtml(primeraEspecie.nombre) : "";
+  const masEspecies = (p.especies?.length ?? 0) > 1 ? ` y ${(p.especies?.length ?? 0) - 1} más` : "";
+  return `
+    <div class="map-popup map-popup-punto">
+      <div class="map-popup-header">
+        <strong class="map-popup-title">${nombre}</strong>
+        <span class="map-popup-tipo">${tipo}</span>
+      </div>
+      ${descShort ? `<p class="map-popup-desc">${descShort}</p>` : ""}
+      ${imgHtml || especieNombre ? `
+        <div class="map-popup-especie">
+          ${imgHtml}
+          ${especieNombre ? `<span class="map-popup-especie-nombre">${especieNombre}${masEspecies}</span>` : ""}
+        </div>
+      ` : ""}
+      <p class="map-popup-hint">Clic para ver la ficha completa</p>
+    </div>
+  `.trim();
+}
+
+function buildUtilPopupContent(u: UtilityLayerItem): string {
+  const labels: Record<string, string> = {
+    sanitario: "Sanitario",
+    emergencia: "Emergencia",
+    salida: "Salida",
+    camino: "Camino",
+  };
+  const tipoLabel = labels[u.tipo] || u.tipo;
+  const nombre = u.nombre ? escapeHtml(u.nombre) : "";
+  return `
+    <div class="map-popup map-popup-util">
+      <strong class="map-popup-title">${tipoLabel}</strong>
+      ${nombre ? `<p class="map-popup-desc">${nombre}</p>` : ""}
+    </div>
+  `.trim();
+}
+
 declare global {
   interface Window {
     L: typeof import("leaflet");
@@ -58,6 +117,7 @@ export default function MapView({
       if (window.L && containerRef.current) {
         const map = initMap();
         if (map) {
+          const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
           (parque.puntos || []).forEach((p) => {
             const L = window.L;
             const icon = L.divIcon({
@@ -68,6 +128,11 @@ export default function MapView({
             });
             const m = L.marker([p.lat, p.lng], { icon })
               .addTo(map)
+              .bindPopup(buildPuntoPopupContent(p, baseUrl), {
+                maxWidth: 280,
+                minWidth: 200,
+                className: "map-popup-punto-wrap",
+              })
               .on("click", () => onPointSelect(p));
             puntoMarkersRef.current.push(m);
           });
@@ -86,7 +151,12 @@ export default function MapView({
               iconSize: [24, 24],
               iconAnchor: [12, 12],
             });
-            const m = L.marker([u.lat, u.lng], { icon }).addTo(map);
+            const m = L.marker([u.lat, u.lng], { icon })
+              .addTo(map)
+              .bindPopup(buildUtilPopupContent(u), {
+                maxWidth: 260,
+                className: "map-popup-util-wrap",
+              });
             utilMarkersRef.current.push(m);
           });
           if (userLocation) {
