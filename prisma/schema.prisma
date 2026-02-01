@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Parque {
+  id          String   @id @default(cuid())
+  nombre      String
+  descripcion String?
+  boundsLat1  Float
+  boundsLng1  Float
+  boundsLat2  Float
+  boundsLng2  Float
+  mapTileUrl  String?
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  puntos            Punto[]
+  especies          Especie[]
+  utilityLayerItems UtilityLayerItem[]
+  fotos             Foto[]
+}
+
+model Punto {
+  id          String   @id @default(cuid())
+  parqueId    String
+  nombre      String
+  tipo        String
+  lat         Float
+  lng         Float
+  descripcion String?
+  orden       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parque     Parque     @relation(fields: [parqueId], references: [id], onDelete: Cascade)
+  especies   PuntoEspecie[]
+  mensajes   Mensaje[]
+  fotos      Foto[]
+}
+
+model Especie {
+  id          String   @id @default(cuid())
+  parqueId    String
+  nombre      String
+  tipo        String
+  descripcion String?
+  imagenUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parque  Parque          @relation(fields: [parqueId], references: [id], onDelete: Cascade)
+  puntos  PuntoEspecie[]
+}
+
+model PuntoEspecie {
+  puntoId   String
+  especieId String
+
+  punto   Punto   @relation(fields: [puntoId], references: [id], onDelete: Cascade)
+  especie Especie @relation(fields: [especieId], references: [id], onDelete: Cascade)
+
+  @@id([puntoId, especieId])
+}
+
+model UtilityLayerItem {
+  id         String   @id @default(cuid())
+  parqueId   String
+  tipo       String
+  lat        Float
+  lng        Float
+  nombre     String?
+  createdAt  DateTime @default(now())
+
+  parque Parque @relation(fields: [parqueId], references: [id], onDelete: Cascade)
+}
+
+model Mensaje {
+  id        String   @id @default(cuid())
+  puntoId   String
+  autor     String?
+  texto     String
+  moderado  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  punto Punto @relation(fields: [puntoId], references: [id], onDelete: Cascade)
+}
+
+
+model Foto {
+  id        String   @id @default(cuid())
+  puntoId   String?
+  parqueId  String
+  url       String
+  autor     String?
+  moderado  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  punto  Punto? @relation(fields: [puntoId], references: [id], onDelete: SetNull)
+  parque Parque @relation(fields: [parqueId], references: [id], onDelete: Cascade)
+}
