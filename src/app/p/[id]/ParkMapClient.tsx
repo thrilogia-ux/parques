@@ -32,6 +32,7 @@ export default function ParkMapClient({
   const [showNearby, setShowNearby] = useState(false);
   const [nearbyData, setNearbyData] = useState<NearbyResponse | null>(null);
   const [nearbyLoading, setNearbyLoading] = useState(false);
+  const [navExpanded, setNavExpanded] = useState(false);
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
   const [loadingMensajes, setLoadingMensajes] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -196,50 +197,67 @@ export default function ParkMapClient({
         <div className="w-12" />
       </header>
 
-      <div className="flex-1 relative min-h-0">
-        <MapView
-          parque={parque}
-          initialPuntoId={initialPuntoId}
-          onPointSelect={setSelectedPunto}
-          userLocation={userLocation}
-          showLayers={showLayers}
-        />
-        <LayersControl showLayers={showLayers} onToggle={toggleLayer} />
+      <div className="flex-1 relative min-h-0 p-2">
+        <div className="w-full h-full rounded-2xl overflow-hidden bg-slate-800">
+          <MapView
+            parque={parque}
+            initialPuntoId={initialPuntoId}
+            onPointSelect={setSelectedPunto}
+            userLocation={userLocation}
+            showLayers={showLayers}
+          />
+          <LayersControl showLayers={showLayers} onToggle={toggleLayer} />
+        </div>
       </div>
 
-      <div className="nav-bottom-spacer" aria-hidden="true" />
+      <div
+        className={navExpanded ? "nav-bottom-spacer" : "nav-bottom-spacer nav-bottom-spacer--collapsed"}
+        aria-hidden="true"
+      />
 
       <nav
-        className="nav-bottom-bar flex items-center justify-around px-4 pt-3"
+        className={`nav-bottom-bar ${navExpanded ? "is-expanded" : ""}`}
         aria-label="Navegación principal"
       >
         <button
           type="button"
-          onClick={() => setShowNearby(false)}
-          className="flex flex-col items-center gap-1 py-1 text-white"
-          aria-label="Mapa"
+          onClick={() => setNavExpanded((v) => !v)}
+          className="w-full flex items-center justify-center gap-2 py-3 text-white hover:bg-slate-700/50 transition-colors rounded-t-xl"
+          aria-expanded={navExpanded}
+          aria-label={navExpanded ? "Cerrar menú" : "Abrir menú"}
         >
-          <span className="text-xl" aria-hidden="true">🗺️</span>
-          <span className="text-xs">Mapa</span>
+          <span className="text-sm font-medium">{navExpanded ? "Cerrar menú" : "Menú"}</span>
+          <span className="text-lg" aria-hidden="true">{navExpanded ? "▼" : "▲"}</span>
         </button>
-        <button
-          type="button"
-          onClick={fetchNearby}
-          className="flex flex-col items-center gap-1 py-1 text-white"
-          aria-label="Qué estás viendo"
-        >
-          <span className="text-xl" aria-hidden="true">👁️</span>
-          <span className="text-xs">Desde aquí</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setSelectedPunto(null)}
-          className="flex flex-col items-center gap-1 py-1 text-slate-400"
-          aria-label="Punto actual"
-        >
-          <span className="text-xl" aria-hidden="true">📍</span>
-          <span className="text-xs">Punto</span>
-        </button>
+        <div className="nav-bottom-menu flex items-center justify-around px-4 pb-2">
+          <button
+            type="button"
+            onClick={() => { setShowNearby(false); setNavExpanded(false); }}
+            className="flex flex-col items-center gap-1 py-1 text-white min-w-[4rem]"
+            aria-label="Mapa"
+          >
+            <span className="text-xl" aria-hidden="true">🗺️</span>
+            <span className="text-xs">Mapa</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => { fetchNearby(); setNavExpanded(false); }}
+            className="flex flex-col items-center gap-1 py-1 text-white min-w-[4rem]"
+            aria-label="Qué estás viendo"
+          >
+            <span className="text-xl" aria-hidden="true">👁️</span>
+            <span className="text-xs">Desde aquí</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => { setSelectedPunto(null); setNavExpanded(false); }}
+            className="flex flex-col items-center gap-1 py-1 text-slate-400 min-w-[4rem]"
+            aria-label="Punto actual"
+          >
+            <span className="text-xl" aria-hidden="true">📍</span>
+            <span className="text-xs">Punto</span>
+          </button>
+        </div>
       </nav>
 
       {showNearby && (

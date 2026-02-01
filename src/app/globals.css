@@ -34,13 +34,37 @@
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px) + 72px);
   background: #1e293b;
   border-top: 1px solid #334155;
+  border-radius: 1rem 1rem 0 0;
+  transition: box-shadow 0.2s ease;
+}
+
+.nav-bottom-bar.is-expanded {
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.nav-bottom-menu {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+}
+
+.nav-bottom-bar.is-expanded .nav-bottom-menu {
+  max-height: 120px;
+  opacity: 1;
 }
 
 .nav-bottom-spacer {
-  /* Misma altura que el menú para que el mapa no quede tapado */
+  /* Misma altura que el menú expandido para que el mapa no quede tapado */
   height: calc(56px + 12px + env(safe-area-inset-bottom, 0px) + 72px);
   min-height: 140px;
   flex-shrink: 0;
+}
+
+.nav-bottom-spacer--collapsed {
+  /* Solo la pestaña + espacio para barra del navegador */
+  height: calc(44px + 12px + env(safe-area-inset-bottom, 0px) + 72px);
+  min-height: 120px;
 }
 
 body {
