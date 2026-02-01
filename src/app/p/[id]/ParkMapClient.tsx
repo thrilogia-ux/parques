@@ -207,8 +207,10 @@ export default function ParkMapClient({
         <LayersControl showLayers={showLayers} onToggle={toggleLayer} />
       </div>
 
+      <div className="nav-bottom-spacer" aria-hidden="true" />
+
       <nav
-        className="flex items-center justify-around px-4 py-3 bg-slate-800 border-t border-slate-700 shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        className="nav-bottom-bar flex items-center justify-around px-4 pt-3"
         aria-label="Navegación principal"
       >
         <button

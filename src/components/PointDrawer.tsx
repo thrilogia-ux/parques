@@ -75,9 +75,9 @@ export default function PointDrawer({
             <h3 className="text-sm font-medium text-slate-400 mb-3">Especies en este punto</h3>
             <ul className="space-y-4">
               {(punto.especies || []).map((e: Especie) => (
-                <li key={e.id} className="rounded-xl bg-slate-700/80 overflow-hidden">
+                <li key={e.id} className="rounded-xl bg-slate-700/80 overflow-hidden border border-slate-600">
                   <div className="flex gap-3 p-3">
-                    <div className="shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-slate-600">
+                    <div className="shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-slate-600">
                       {e.imagenUrl ? (
                         <img
                           src={e.imagenUrl}
@@ -85,7 +85,7 @@ export default function PointDrawer({
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-3xl text-slate-500" aria-hidden="true">
+                        <div className="w-full h-full flex items-center justify-center text-4xl text-slate-500" aria-hidden="true">
                           {e.tipo === "árbol" ? "🌳" : e.tipo === "animal" ? "🦌" : "🌿"}
                         </div>
                       )}
@@ -94,7 +94,10 @@ export default function PointDrawer({
                       <p className="font-medium text-white">{e.nombre}</p>
                       <p className="text-xs text-emerald-400/90 uppercase tracking-wide mt-0.5">{e.tipo}</p>
                       {e.descripcion && (
-                        <p className="text-sm text-slate-300 mt-2 line-clamp-3">{e.descripcion}</p>
+                        <>
+                          <p className="text-xs text-slate-500 mt-2 uppercase tracking-wide">Descripción e historia</p>
+                          <p className="text-sm text-slate-300 mt-1 whitespace-pre-line">{e.descripcion}</p>
+                        </>
                       )}
                     </div>
                   </div>

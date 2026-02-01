@@ -23,6 +23,26 @@
   }
 }
 
+/* Menú inferior fijo: queda por encima de la barra del navegador en móvil */
+.nav-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  /* Espacio para barra del navegador (~72px) + safe area en iPhone */
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px) + 72px);
+  background: #1e293b;
+  border-top: 1px solid #334155;
+}
+
+.nav-bottom-spacer {
+  /* Misma altura que el menú para que el mapa no quede tapado */
+  height: calc(56px + 12px + env(safe-area-inset-bottom, 0px) + 72px);
+  min-height: 140px;
+  flex-shrink: 0;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

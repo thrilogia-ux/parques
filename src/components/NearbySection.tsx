@@ -38,7 +38,7 @@ export default function NearbySection({
           ✕
         </button>
       </div>
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 pb-28">
         {loading ? (
           <p className="text-slate-400">Obteniendo ubicación...</p>
         ) : (
@@ -68,16 +68,37 @@ export default function NearbySection({
             )}
             {especies.length > 0 && (
               <section>
-                <h3 className="text-sm font-medium text-slate-400 mb-2">
+                <h3 className="text-sm font-medium text-slate-400 mb-3">
                   Especies en la zona
                 </h3>
-                <ul className="flex flex-wrap gap-2">
+                <ul className="space-y-4">
                   {especies.map((e) => (
                     <li
                       key={e.id}
-                      className="px-3 py-1.5 rounded-full bg-slate-700 text-white text-sm"
+                      className="rounded-xl bg-slate-700/80 overflow-hidden border border-slate-600"
                     >
-                      {e.nombre} ({e.tipo})
+                      <div className="flex gap-3 p-3">
+                        <div className="shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-slate-600">
+                          {e.imagenUrl ? (
+                            <img
+                              src={e.imagenUrl}
+                              alt={e.nombre}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-3xl text-slate-500" aria-hidden="true">
+                              {e.tipo === "árbol" ? "🌳" : e.tipo === "animal" ? "🦌" : "🌿"}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-white">{e.nombre}</p>
+                          <p className="text-xs text-emerald-400/90 uppercase tracking-wide mt-0.5">{e.tipo}</p>
+                          {e.descripcion && (
+                            <p className="text-sm text-slate-300 mt-2 line-clamp-4 whitespace-pre-line">{e.descripcion}</p>
+                          )}
+                        </div>
+                      </div>
                     </li>
                   ))}
                 </ul>
