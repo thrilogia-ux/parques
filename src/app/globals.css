@@ -23,23 +23,24 @@
   }
 }
 
-/* Menú inferior fijo: queda por encima de la barra del navegador en móvil */
+/* Menú inferior fijo: cerrado queda a la altura de la barra del navegador (línea amarilla) */
 .nav-bottom-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 30;
-  /* Espacio para barra del navegador (~72px) + safe area en iPhone */
-  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px) + 72px);
+  /* Cerrado: pestaña justo encima de la barra del navegador */
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px);
   background: #1e293b;
   border-top: 1px solid #334155;
   border-radius: 1rem 1rem 0 0;
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease, padding-bottom 0.2s ease;
 }
 
 .nav-bottom-bar.is-expanded {
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px) + 72px);
 }
 
 .nav-bottom-menu {
@@ -62,9 +63,9 @@
 }
 
 .nav-bottom-spacer--collapsed {
-  /* Pestaña mínima + barra navegador: menú lo más abajo posible, máximo espacio al mapa */
-  height: calc(20px + 4px + env(safe-area-inset-bottom, 0px) + 72px);
-  min-height: 80px;
+  /* Pestaña justo encima de la barra del navegador (altura de la línea amarilla) */
+  height: calc(16px + env(safe-area-inset-bottom, 0px) + 72px);
+  min-height: 88px;
 }
 
 body {

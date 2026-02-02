@@ -223,12 +223,12 @@ export default function ParkMapClient({
         <button
           type="button"
           onClick={() => setNavExpanded((v) => !v)}
-          className="w-full flex items-center justify-center gap-1.5 py-1.5 text-white hover:bg-slate-700/50 transition-colors rounded-t-xl min-h-[20px]"
+          className="w-full flex items-center justify-center gap-1 py-1 text-white hover:bg-slate-700/50 transition-colors rounded-t-xl min-h-[16px]"
           aria-expanded={navExpanded}
           aria-label={navExpanded ? "Cerrar menú" : "Abrir menú"}
         >
-          <span className="text-[11px] font-medium">{navExpanded ? "Cerrar menú" : "Menú"}</span>
-          <span className="text-sm" aria-hidden="true">{navExpanded ? "▼" : "▲"}</span>
+          <span className="text-[10px] font-medium">{navExpanded ? "Cerrar menú" : "Menú"}</span>
+          <span className="text-xs" aria-hidden="true">{navExpanded ? "▼" : "▲"}</span>
         </button>
         <div className="nav-bottom-menu flex items-center justify-around px-4 pb-2">
           <button
